@@ -5,10 +5,11 @@ use axum::{
 };
 
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, Condition, DatabaseConnection, EntityTrait, QueryOrder,
-QueryFilter, ColumnTrait };
+QueryFilter, ColumnTrait, PaginatorTrait };
 use serde_json::json;
-use crate::model::category_model::{ CategoryCreateBody, CategoryData, CategoryUpdateBody };
+use crate::model::{category_model::{ CategoryCreateBody, CategoryData, CategoryUpdateBody, CategoryPaginate }, pagination_model::PaginationBody};
 use entity::category;
+use crate::model::pagination_model::PaginationResponse;
 
 pub async fn find_many(State(db): State<DatabaseConnection>) -> impl IntoResponse {
 	let query_data: Vec<CategoryData> = category::Entity::find()
@@ -22,6 +23,47 @@ pub async fn find_many(State(db): State<DatabaseConnection>) -> impl IntoRespons
 	(
 		StatusCode::OK,
 		json!(query_data).to_string()
+	)
+}
+
+pub async fn search_paginate(
+	State(db): State<DatabaseConnection>,
+	Json(body): Json<PaginationBody>
+) -> impl IntoResponse {
+	const PAGE_TAKE: i64 = 10;
+
+	let query_count = category::Entity::find().filter(
+		Condition::any().add(
+			category::Column::Name.contains(&body.term)
+		)
+	).count(&db).await.unwrap();
+
+	let query_search: Vec<CategoryData> = category::Entity::find().filter(
+		Condition::any().add(
+			category::Column::Name.contains(&body.term)
+		)
+	).order_by_asc(category::Column::Name).all(&db).await.unwrap().iter().into_iter().map(|d| CategoryData {
+		id: d.id,
+		name: d.name.clone(),
+		created_at: d.created_at,
+		updated_at: d.updated_at
+	}).collect();
+
+	let total_page = ((query_count as f64 / PAGE_TAKE as f64) + 0.4).round() as i64;
+
+	let pagination_response = CategoryPaginate {
+		data: query_search,
+		paginate: PaginationResponse {
+			per_page: PAGE_TAKE,
+			total_page: total_page,
+			count: query_count as i64,
+			current_page: body.page
+		}
+	};
+
+	(
+		StatusCode::OK,
+		json!(pagination_response).to_string()
 	)
 }
 
@@ -87,6 +129,7 @@ pub async fn update(State(db): State<DatabaseConnection>,
 	    	let mut category_model: category::ActiveModel = val.into();
 
 	    	category_model.name = Set(body.name.unwrap().to_owned());
+	    	category_model.updated_at = Set(chrono::Utc::now().naive_utc()); // I want to use Current NaiveDateTime
 
 	    	match category_model.update(&db).await {
 	    	    Ok(_) => (

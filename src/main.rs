@@ -5,7 +5,7 @@ use axum::{routing::{delete, get, post, put}, Router};
 mod model;
 mod controller;
 
-use controller::category_controller;
+use controller::{category_controller, product_controller};
 
 #[tokio::main]
 async fn main() {
@@ -24,11 +24,19 @@ async fn main() {
 
     let app_router = Router::new()
     .route("/api", get(|| async { "Hello World" }))
+    // Category Route
     .route("/api/category", post(category_controller::create))
     .route("/api/category/many", get(category_controller::find_many))
+    .route("/api/category/search", post(category_controller::search_paginate))
     .route("/api/category/first/{id}", get(category_controller::find_first))
     .route("/api/category/{id}", put(category_controller::update))
     .route("/api/category/{id}", delete(category_controller::delete))
+
+    // Product Route
+    .route("/api/product/search", post(product_controller::search_paginate))
+    .route("/api/product", post(product_controller::create))
+    .route("/api/product/{id}", put(product_controller::update))
+    .route("/api/product/{id}", delete(product_controller::delete))
     .with_state(db);
 
 

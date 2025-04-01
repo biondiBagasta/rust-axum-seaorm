@@ -1,5 +1,5 @@
 use serde::{ Deserialize, Serialize };
-use crate::model::pagination_model::{ PaginateResponse };
+use crate::model::pagination_model::{ PaginationResponse };
 
 #[derive(Serialize)]
 pub struct CategoryData {
@@ -11,8 +11,8 @@ pub struct CategoryData {
 
 #[derive(Serialize)]
 pub struct CategoryPaginate {
-	pub data: CategoryData,
-	pub paginate: PaginateResponse
+	pub data: Vec<CategoryData>,
+	pub paginate: PaginationResponse
 }
 
 #[derive(Deserialize)]

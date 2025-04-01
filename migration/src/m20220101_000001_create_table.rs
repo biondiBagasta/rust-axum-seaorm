@@ -17,7 +17,7 @@ impl MigrationTrait for Migration {
                     .col(date_time(Category::UpdatedAt).default(Expr::current_timestamp()))
                     .to_owned(),
             )
-            .await
+            .await    
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -35,3 +35,4 @@ enum Category {
     CreatedAt,
     UpdatedAt
 }
+
