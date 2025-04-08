@@ -16,7 +16,7 @@ use sea_orm::{
 
 use serde_json::json;
 
-use crate::model::product_model::{ ProductPaginate, ProductCreateDto, ProductUpdateDto, ProductData,
+use crate::model::product_model::{ ProductPaginate, ProductCreateDto, ProductUpdateDto,
 ProductWithCategoryData };
 use crate::model::category_model::CategoryData;
 

@@ -5,7 +5,7 @@ use axum::{routing::{delete, get, post, put}, Router};
 mod model;
 mod controller;
 
-use controller::{category_controller, product_controller};
+use controller::{category_controller, product_controller, user_controller};
 
 #[tokio::main]
 async fn main() {
@@ -37,6 +37,12 @@ async fn main() {
     .route("/api/product", post(product_controller::create))
     .route("/api/product/{id}", put(product_controller::update))
     .route("/api/product/{id}", delete(product_controller::delete))
+
+    // User Route
+    .route("/api/user/many", get(user_controller::find_many))
+    .route("/api/user", post(user_controller::create))
+    .route("/api/user/{id}", put(user_controller::update))
+    .route("/api/user/{id}", delete(user_controller::delete))
     .with_state(db);
 
 

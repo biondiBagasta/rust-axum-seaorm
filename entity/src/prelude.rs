@@ -2,3 +2,4 @@
 
 pub use super::category::Entity as Category;
 pub use super::product::Entity as Product;
+pub use super::user::Entity as User;

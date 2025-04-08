@@ -159,7 +159,7 @@ pub async fn delete(State(db): State<DatabaseConnection>,
 			if val.rows_affected == 0 {
 				(
 					StatusCode::NOT_FOUND,
-					json!({ "success": false, "message": "Category Data Not Found!!!." }).to_string()
+					json!({ "success": false, "message": "Data Not Found!!!." }).to_string()
 				)
 			} else {
 				(
