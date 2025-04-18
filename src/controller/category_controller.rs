@@ -4,8 +4,11 @@ use axum::{
 	response::IntoResponse, Json
 };
 
+use sea_orm::sea_query::extension::postgres::PgExpr;
+use sea_orm::sea_query::Expr;
+
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, Condition, DatabaseConnection, EntityTrait, QueryOrder,
-QueryFilter, ColumnTrait, PaginatorTrait };
+QueryFilter, ColumnTrait, PaginatorTrait, QuerySelect };
 use serde_json::json;
 use crate::model::{category_model::{ CategoryCreateBody, CategoryData, CategoryUpdateBody, CategoryPaginate }, pagination_model::PaginationBody};
 use entity::category;
@@ -32,6 +35,8 @@ pub async fn search_paginate(
 ) -> impl IntoResponse {
 	const PAGE_TAKE: i64 = 10;
 
+	let page_offset = (&body.page - 1) * PAGE_TAKE;
+
 	let query_count = category::Entity::find().filter(
 		Condition::any().add(
 			category::Column::Name.contains(&body.term)
@@ -40,9 +45,9 @@ pub async fn search_paginate(
 
 	let query_search: Vec<CategoryData> = category::Entity::find().filter(
 		Condition::any().add(
-			category::Column::Name.contains(&body.term)
+			Expr::col(category::Column::Name).ilike(format!("%{}%", body.term))
 		)
-	).order_by_asc(category::Column::Name).all(&db).await.unwrap().iter().into_iter().map(|d| CategoryData {
+	).order_by_asc(category::Column::Name).offset(page_offset as u64).limit(PAGE_TAKE as u64).all(&db).await.unwrap().iter().into_iter().map(|d| CategoryData {
 		id: d.id,
 		name: d.name.clone(),
 		created_at: d.created_at,

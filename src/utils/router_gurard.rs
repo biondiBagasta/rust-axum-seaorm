@@ -8,9 +8,13 @@ use axum::{
 use jsonwebtoken::{ decode, DecodingKey, Validation };
 use serde_json::json;
 use crate::model::user_model::JwtClaims;
-use crate::utils::utils::JWT_SECRET;
+
 
 pub async fn auth_guard(req: Request<Body>, next: Next) -> Result<Response, (StatusCode, String)> {
+    dotenvy::dotenv().expect("Failed to load .env file.");
+
+	let jwt_secret = std::env::var("JWT_SECRET").unwrap();
+
 	let extracted_header_value = req.headers().get("Authorization");
 
 	match extracted_header_value {
@@ -25,7 +29,7 @@ pub async fn auth_guard(req: Request<Body>, next: Next) -> Result<Response, (Sta
 						Some(token) => {
 							let decoed_token = decode::<JwtClaims>(
 								token, 
-								&DecodingKey::from_secret(JWT_SECRET.as_ref()), 
+								&DecodingKey::from_secret(jwt_secret.as_ref()), 
 								&Validation::default()
 							);
 

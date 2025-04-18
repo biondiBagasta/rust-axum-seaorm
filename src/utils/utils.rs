@@ -1,1 +1,1 @@
-pub const JWT_SECRET: &str = "a3budrspk2m";
+// pub const JWT_SECRET: &str = "a3budrspk2m";

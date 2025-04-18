@@ -48,8 +48,7 @@ async fn main() {
 
     let auth_router = Router::new()
     .route("/api/auth/authenticated", post(auth_controller::authenticated))
-    .route("/api/auth/change-password", post(auth_controller::change_password))
-    .route_layer(middleware::from_fn(auth_guard));
+    .route("/api/auth/change-password", post(auth_controller::change_password));
 
     let product_router = Router::new()
     .route("/api/product/search", post(product_controller::search_paginate))
